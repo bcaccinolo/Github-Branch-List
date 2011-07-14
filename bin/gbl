@@ -1,10 +1,30 @@
+#! /usr/bin/ruby 
 
-def diff_branches br1, br2
-  puts "#{br1} .. #{br2}"
-  ahead = `git rev-list #{br1}..#{br2} | wc -l`
-  behind = `git rev-list #{br2}..#{br1} | wc -l`
-  puts "#{br2} is #{ahead.strip} ahead #{br1}"
-  puts "#{br2} is #{behind.strip} behind #{br1}"
+def remote_branches
+  branches = []
+  output = `git branch -r`
+  output.each_line do |line|
+    branches << line.strip
+  end
+  branches.delete_at(0)
+  branches
 end
 
-diff_branches "master", "deploy_staging"
+def diff_branches br1, br2
+  name1 = br1.gsub /origin\//, ""
+  name2 = br2.gsub /origin\//, ""
+  ahead = `git rev-list #{br1}..#{br2} | wc -l`
+  behind = `git rev-list #{br2}..#{br1} | wc -l`
+  puts "#{name2} from #{name1} is #{ahead.strip} ahead "
+  puts "#{name2} from #{name1} is #{behind.strip} behind "
+  puts 
+end
+
+def diff_all_branhces_with_master
+  branches = remote_branches
+  branches.each do |br|
+    diff_branches "origin/master", br
+  end
+end
+
+diff_all_branhces_with_master
