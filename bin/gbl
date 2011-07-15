@@ -34,21 +34,28 @@ def remote_branches
   branches
 end
 
-def diff_branches br1, br2
+def diff_branches br1, br2, options
   name1 = br1.gsub /origin\//, ""
   name2 = br2.gsub /origin\//, ""
-  ahead = `git rev-list #{br1}..#{br2} | wc -l`
-  behind = `git rev-list #{br2}..#{br1} | wc -l`
-  puts "#{name2} from #{name1} is #{ahead.strip} ahead "
-  puts "#{name2} from #{name1} is #{behind.strip} behind "
-  puts 
+  ahead = `git rev-list #{br1}..#{br2} | wc -l`.strip
+  behind = `git rev-list #{br2}..#{br1} | wc -l`.strip
+
+  display = true
+  display = false if options.include? :to_delete && ahead.to_i != 0
+
+  if display == true
+    puts "#{name2} from #{name1} is #{ahead} ahead "
+    puts "#{name2} from #{name1} is #{behind} behind "
+    puts 
+  end
+
 end
 
-def diff_all_branhces_with_master
+def diff_all_branhces_with_master options
   branches = remote_branches
   branches.each do |br|
-    diff_branches "origin/master", br
+    diff_branches "origin/master", br, options
   end
 end
 
-diff_all_branhces_with_master
+diff_all_branhces_with_master options
