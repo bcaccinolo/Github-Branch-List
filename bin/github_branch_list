@@ -1,10 +1,11 @@
 #! /usr/bin/ruby 
 
 require 'optparse'
+require 'yaml'
 
 options = {}
 OptionParser.new do |opts|
-opts.banner = "Usage: ghl [options]"
+opts.banner = "Usage: github_branch_list [options]"
 
 opts.on("-d", "--to-delete", "Only display branches to delete") do |v|
   options[:to_delete] = 1
@@ -35,13 +36,19 @@ def remote_branches
 end
 
 def diff_branches br1, br2, options
+
   name1 = br1.gsub /origin\//, ""
   name2 = br2.gsub /origin\//, ""
+
+  return if name1 == name2
+
   ahead = `git rev-list #{br1}..#{br2} | wc -l`.strip
   behind = `git rev-list #{br2}..#{br1} | wc -l`.strip
 
   display = true
-  display = false if options.include? :to_delete && ahead.to_i != 0
+if options.include?(:to_delete) && (ahead.to_i != 0)
+  display = false 
+end
 
   if display == true
     puts "#{name2} from #{name1} is #{ahead} ahead "
