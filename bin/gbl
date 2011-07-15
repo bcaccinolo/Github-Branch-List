@@ -1,5 +1,29 @@
 #! /usr/bin/ruby 
 
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+opts.banner = "Usage: ghl [options]"
+
+opts.on("-d", "--to-delete", "Only display branches to delete") do |v|
+  options[:to_delete] = 1
+end
+
+opts.on("-v", "--version", "Version") do |v|
+  options[:version] = 1
+end
+
+end.parse!
+
+#p options
+#p ARGV
+
+if options.include? :version
+  puts "0.1.3"
+  exit
+end
+
 def remote_branches
   branches = []
   output = `git branch -r`
