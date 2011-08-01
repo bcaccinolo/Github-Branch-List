@@ -25,7 +25,7 @@ end.parse!
 #p ARGV
 
 if options.include? :version
-  puts "0.3.1"
+  puts "0.4.0"
   exit
 end
 
@@ -50,19 +50,19 @@ def diff_branches br1, br2, options
   behind = `git rev-list #{br2}..#{br1} | wc -l`.strip
 
   display = true
-  if options.include?(:to_delete) && (ahead.to_i != 0)
+  if (options.include?(:to_delete) || options.include?(:to_delete_with_proposal)) && (ahead.to_i != 0)
     display = false 
   end
 
   if display == true
+    puts 
     puts "#{name2} from #{name1} is #{ahead} ahead "
     puts "#{name2} from #{name1} is #{behind} behind "
-    puts 
-    if options.include(:to_delete_with_proposal)
-      puts "Do you want to delete this remote branch? [y/N]"
+    if options.include?(:to_delete_with_proposal)
+      puts "Do you want to delete the remote branch #{name2}? [y/N]"
       r = STDIN.gets
       if r.strip == "y"
-        `git push origin :#{name1}`
+        `git push origin :#{name2}`
       end
     end
     
