@@ -11,6 +11,10 @@ opts.on("-d", "--to-delete", "Only display branches to delete") do |v|
   options[:to_delete] = 1
 end
 
+opts.on("-D", "--to-delete-with-proposel", "Display branches to delete and propose to remove them one by one") do |v|
+  options[:to_delete_with_proposal] = 1
+end
+
 opts.on("-v", "--version", "Version") do |v|
   options[:version] = 1
 end
@@ -21,7 +25,7 @@ end.parse!
 #p ARGV
 
 if options.include? :version
-  puts "0.3.0"
+  puts "0.3.1"
   exit
 end
 
@@ -46,19 +50,28 @@ def diff_branches br1, br2, options
   behind = `git rev-list #{br2}..#{br1} | wc -l`.strip
 
   display = true
-if options.include?(:to_delete) && (ahead.to_i != 0)
-  display = false 
-end
+  if options.include?(:to_delete) && (ahead.to_i != 0)
+    display = false 
+  end
 
   if display == true
     puts "#{name2} from #{name1} is #{ahead} ahead "
     puts "#{name2} from #{name1} is #{behind} behind "
     puts 
+    if options.include(:to_delete_with_proposal)
+      puts "Do you want to delete this remote branch? [y/N]"
+      r = STDIN.gets
+      if r.strip == "y"
+        `git push origin :#{name1}`
+      end
+    end
+    
   end
 
 end
 
 def diff_all_branhces_with_master options
+  `git fetch origin`
   branches = remote_branches
   branches.each do |br|
     diff_branches "origin/master", br, options
