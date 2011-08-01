@@ -11,8 +11,16 @@ opts.on("-d", "--to-delete", "Only display branches to delete") do |v|
   options[:to_delete] = 1
 end
 
-opts.on("-D", "--to-delete-with-proposel", "Display branches to delete and propose to remove them one by one") do |v|
+opts.on("-D", "--to-delete-with-proposal", "Display branches to delete and propose to remove them one by one") do |v|
   options[:to_delete_with_proposal] = 1
+end
+
+opts.on("-L", "--just-local", "Only treat local branches") do |v|
+  options[:just_local_branches] = 1
+end
+
+opts.on("-R", "--just-remote", "Only treat remote branches") do |v|
+  options[:just_remote_branches] = 1
 end
 
 opts.on("-v", "--version", "Version") do |v|
@@ -20,6 +28,11 @@ opts.on("-v", "--version", "Version") do |v|
 end
 
 end.parse!
+
+unless options.include?(:just_local_branches) || options.include?(:just_remote_branches)
+  options[:just_local_branches] = true
+  options[:just_remote_branches] = true
+end
 
 #p options
 #p ARGV
@@ -37,7 +50,7 @@ def remote_branches remotes=false
     output = `git branch`
   end
   output.each_line do |line|
-    branches << line.strip
+    branches << line.strip.gsub(/\* /,"")
   end
   branches.delete_at(0)
   branches
@@ -82,19 +95,23 @@ end
 def diff_all_branhces_with_master options
   `git fetch origin`
 
-  options[:remote] = true
-  title_block "REMOTE BRANCHES"
-  branches = remote_branches(options[:remote])
-  branches.each do |br|
-    diff_branches "origin/master", br, options
+  if options[:just_remote_branches]
+    title_block "REMOTE BRANCHES"
+    branches = remote_branches(true)
+    branches.each do |br|
+      diff_branches "origin/master", br, options
+    end
   end
 
-  options[:remote] = false
-  title_block "LOCAL BRANCHES"
-  branches = remote_branches(options[:remote])
-  branches.each do |br|
-    diff_branches "origin/master", br, options
+  if options[:just_local_branches]
+    options[:remote] = false
+    title_block "LOCAL BRANCHES"
+    branches = remote_branches(false)
+    branches.each do |br|
+      diff_branches "origin/master", br, options
+    end
   end
+
 end
 
 def title_block text=""
