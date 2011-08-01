@@ -25,13 +25,17 @@ end.parse!
 #p ARGV
 
 if options.include? :version
-  puts "0.4.0"
+  puts "0.5.0"
   exit
 end
 
-def remote_branches
+def remote_branches remotes=false
   branches = []
-  output = `git branch -r`
+  if remotes
+    output = `git branch -r`
+  else
+    output = `git branch`
+  end
   output.each_line do |line|
     branches << line.strip
   end
@@ -43,6 +47,7 @@ def diff_branches br1, br2, options
 
   name1 = br1.gsub /origin\//, ""
   name2 = br2.gsub /origin\//, ""
+
 
   return if name1 == name2
 
@@ -62,7 +67,11 @@ def diff_branches br1, br2, options
       puts "Do you want to delete the remote branch #{name2}? [y/N]"
       r = STDIN.gets
       if r.strip == "y"
-        `git push origin :#{name2}`
+        if options[:remote]
+          `git push origin :#{name2}`
+        else 
+          `git br -D #{name2}`
+        end
       end
     end
     
@@ -72,10 +81,27 @@ end
 
 def diff_all_branhces_with_master options
   `git fetch origin`
-  branches = remote_branches
+
+  options[:remote] = true
+  title_block "REMOTE BRANCHES"
+  branches = remote_branches(options[:remote])
   branches.each do |br|
     diff_branches "origin/master", br, options
   end
+
+  options[:remote] = false
+  title_block "LOCAL BRANCHES"
+  branches = remote_branches(options[:remote])
+  branches.each do |br|
+    diff_branches "origin/master", br, options
+  end
+end
+
+def title_block text=""
+  puts
+  puts "========================================"
+  puts text
+  puts "========================================"
 end
 
 diff_all_branhces_with_master options
