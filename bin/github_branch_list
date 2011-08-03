@@ -38,7 +38,7 @@ end
 #p ARGV
 
 if options.include? :version
-  puts "0.5.0"
+  puts "0.6.1"
   exit
 end
 
@@ -50,7 +50,9 @@ def remote_branches remotes=false
     output = `git branch`
   end
   output.each_line do |line|
-    branches << line.strip.gsub(/\* /,"")
+    unless line =~ /HEAD/
+      branches << line.strip.gsub(/\* /,"")
+    end
   end
   branches.delete_at(0)
   branches
@@ -80,7 +82,7 @@ def diff_branches br1, br2, options
       puts "Do you want to delete the remote branch #{name2}? [y/N]"
       r = STDIN.gets
       if r.strip == "y"
-        if options[:remote]
+        if options[:just_remote_branches]
           `git push origin :#{name2}`
         else 
           `git br -D #{name2}`
