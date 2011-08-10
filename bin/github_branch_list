@@ -95,9 +95,9 @@ def diff_branches br1, br2, options
 end
 
 def diff_all_branhces_with_master options
-  `git fetch origin`
 
   if options[:just_remote_branches]
+    `git fetch origin`
     title_block "REMOTE BRANCHES"
     branches = remote_branches(true)
     branches.each do |br|
@@ -106,6 +106,7 @@ def diff_all_branhces_with_master options
   end
 
   if options[:just_local_branches]
+    `git fetch origin`
     options[:remote] = false
     title_block "LOCAL BRANCHES"
     branches = remote_branches(false)
