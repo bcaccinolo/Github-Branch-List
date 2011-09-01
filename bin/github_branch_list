@@ -105,13 +105,13 @@ def diff_all_branhces_with_master options
     end
   end
 
+  options[:just_remote_branches] = false
   if options[:just_local_branches]
     `git fetch origin`
-    options[:remote] = false
     title_block "LOCAL BRANCHES"
     branches = remote_branches(false)
     branches.each do |br|
-      diff_branches "origin/master", br, options
+      diff_branches "master", br, options
     end
   end
 
