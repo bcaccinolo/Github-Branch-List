@@ -85,7 +85,7 @@ def diff_branches br1, br2, options
         if options[:just_remote_branches]
           `git push origin :#{name2}`
         else 
-          `git br -D #{name2}`
+          `git branch -D #{name2}`
         end
       end
     end
